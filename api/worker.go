@@ -7,6 +7,7 @@ import (
 	"blockbook/db"
 	"bytes"
 	"encoding/json"
+	"encoding/hex"
 	"fmt"
 	"math"
 	"math/big"
@@ -17,6 +18,8 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/juju/errors"
+	"github.com/SINOVATEblockchain/btcutil/txscript"
+	//"github.com/martinboehm/btcutil/txscript"
 )
 
 // Worker is handle to api worker
@@ -229,6 +232,8 @@ func (w *Worker) GetTransactionFromBchainTx(bchainTx *bchain.Tx, height int, spe
 		vout.ValueSat = (*Amount)(&bchainVout.ValueSat)
 		valOutSat.Add(&valOutSat, &bchainVout.ValueSat)
 		vout.Hex = bchainVout.ScriptPubKey.Hex
+                data, err := hex.DecodeString(bchainVout.ScriptPubKey.Hex)
+                vout.Type = txscript.GetScriptClass(data).String()
 		vout.AddrDesc, vout.Addresses, vout.IsAddress, err = w.getAddressesFromVout(bchainVout)
 		if err != nil {
 			glog.V(2).Infof("getAddressesFromVout error %v, %v, output %v", err, bchainTx.Txid, bchainVout.N)
