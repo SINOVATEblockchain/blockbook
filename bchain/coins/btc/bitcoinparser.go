@@ -16,7 +16,7 @@ import (
 	"github.com/martinboehm/btcutil/chaincfg"
 	"github.com/martinboehm/btcutil/hdkeychain"
 	"github.com/SINOVATEblockchain/btcutil/txscript"
-	//"github.com/martinboehm/btcutil/txscript"
+
 )
 
 // OutputScriptToAddressesFunc converts ScriptPubKey to bitcoin addresses
@@ -75,17 +75,14 @@ func (p *BitcoinParser) GetAddrDescFromVout(output *bchain.Vout) (bchain.Address
 		return ad, err
 	}
 
-	pops, err := parseScript(ad)
-	if err != nil {
-		return ad, err
-	}
+	sc := txscript.GetScriptClass(ad)
 
 	// in Sinovate network: 2 more standard is: TimeLock and Burn_And_Data
 	// TimeLock is spendable, need to be indexed
-	if isTimeLock(pops) return txscript.ConvertTimeLocktoP2PKH(pops)
+	if  sc == txscript.TimeLockTy { return txscript.ConvertTimeLocktoP2PKH(ad) }
 	// convert possible P2PK script to P2PKH
 	// so that all transactions by given public key are indexed together
-	else return txscript.ConvertP2PKtoP2PKH(p.Params.Base58CksumHasher, ad)
+	return txscript.ConvertP2PKtoP2PKH(p.Params.Base58CksumHasher, ad)
 }
 
 // GetAddrDescFromAddress returns internal address representation (descriptor) of given address
