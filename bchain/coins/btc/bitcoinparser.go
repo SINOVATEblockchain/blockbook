@@ -15,7 +15,8 @@ import (
 	"github.com/martinboehm/btcutil"
 	"github.com/martinboehm/btcutil/chaincfg"
 	"github.com/martinboehm/btcutil/hdkeychain"
-	"github.com/martinboehm/btcutil/txscript"
+	"github.com/SINOVATEblockchain/btcutil/txscript"
+	//"github.com/martinboehm/btcutil/txscript"
 )
 
 // OutputScriptToAddressesFunc converts ScriptPubKey to bitcoin addresses
@@ -73,9 +74,18 @@ func (p *BitcoinParser) GetAddrDescFromVout(output *bchain.Vout) (bchain.Address
 	if err != nil {
 		return ad, err
 	}
+
+	pops, err := parseScript(ad)
+	if err != nil {
+		return ad, err
+	}
+
+	// in Sinovate network: 2 more standard is: TimeLock and Burn_And_Data
+	// TimeLock is spendable, need to be indexed
+	if isTimeLock(pops) return txscript.ConvertTimeLocktoP2PKH(pops)
 	// convert possible P2PK script to P2PKH
 	// so that all transactions by given public key are indexed together
-	return txscript.ConvertP2PKtoP2PKH(p.Params.Base58CksumHasher, ad)
+	else return txscript.ConvertP2PKtoP2PKH(p.Params.Base58CksumHasher, ad)
 }
 
 // GetAddrDescFromAddress returns internal address representation (descriptor) of given address
@@ -204,7 +214,8 @@ func (p *BitcoinParser) outputScriptToAddresses(script []byte) ([]string, bool, 
 		rv[i] = a.EncodeAddress()
 	}
 	var s bool
-	if sc == txscript.PubKeyHashTy || sc == txscript.WitnessV0PubKeyHashTy || sc == txscript.ScriptHashTy || sc == txscript.WitnessV0ScriptHashTy {
+	if sc == txscript.PubKeyHashTy || sc == txscript.WitnessV0PubKeyHashTy || sc == txscript.ScriptHashTy ||
+	sc == txscript.WitnessV0ScriptHashTy || sc == txscript.TimeLockTy || sc == txscript.BurnAndDataTy{
 		s = true
 	} else if len(rv) == 0 {
 		or := p.TryParseOPReturn(script)
@@ -240,14 +251,23 @@ func (p *BitcoinParser) TxFromMsgTx(t *wire.MsgTx, parseAddresses bool) bchain.T
 	vout := make([]bchain.Vout, len(t.TxOut))
 	for i, out := range t.TxOut {
 		addrs := []string{}
+		vtype := ""
 		if parseAddresses {
-			addrs, _, _ = p.OutputScriptToAddressesFunc(out.PkScript)
+			//addrs, _, _ = p.OutputScriptToAddressesFunc(out.PkScript)
+			sc, addresses, _, err := txscript.ExtractPkScriptAddrs(out.PkScript, p.Params)
+			if err != nil {
+				vtype = sc.String()
+			}
+			addrs = make([]string, len(addresses))
+			for i, a := range addresses {
+				addrs[i] = a.EncodeAddress()
+			}
 		}
 		s := bchain.ScriptPubKey{
 			Hex:       hex.EncodeToString(out.PkScript),
 			Addresses: addrs,
 			// missing: Asm,
-			// missing: Type,
+			Type:      vtype,
 		}
 		var vs big.Int
 		vs.SetInt64(out.Value)
