@@ -25,13 +25,13 @@ func init() {
 	MainNetParams.Net = MainnetMagic
 	MainNetParams.PubKeyHashAddrID = []byte{63}
 	MainNetParams.ScriptHashAddrID = []byte{5}
-	MainNetParams.Bech32HRPSegwit = "bc"
+	MainNetParams.Bech32HRPSegwit = "sin"
 
 	TestNetParams = chaincfg.TestNet3Params
 	TestNetParams.Net = TestnetMagic
 	TestNetParams.PubKeyHashAddrID = []byte{63}
 	TestNetParams.ScriptHashAddrID = []byte{5}
-	TestNetParams.Bech32HRPSegwit = "tb"
+	TestNetParams.Bech32HRPSegwit = "tsin"
 }
 
 // SinovateParser handle

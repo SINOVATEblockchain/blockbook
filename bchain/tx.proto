@@ -15,6 +15,7 @@ syntax = "proto3";
             uint32 N = 2;
             bytes ScriptPubKeyHex = 3;
             repeated string Addresses = 4;
+            string Type = 5;
         }
         bytes Txid = 1;
         bytes Hex = 2;

@@ -61,7 +61,7 @@ type Vin struct {
 type ScriptPubKey struct {
 	// Asm       string   `json:"asm"`
 	Hex string `json:"hex,omitempty"`
-	// Type      string   `json:"type"`
+	Type      string   `json:"type"`
 	Addresses []string `json:"addresses"`
 }
 
@@ -71,6 +71,7 @@ type Vout struct {
 	JsonValue    json.Number  `json:"value"`
 	N            uint32       `json:"n"`
 	ScriptPubKey ScriptPubKey `json:"scriptPubKey"`
+	Type         string       `json:"type"`
 }
 
 // Tx is blockchain transaction

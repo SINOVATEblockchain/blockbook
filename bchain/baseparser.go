@@ -200,6 +200,7 @@ func (p *BaseParser) PackTx(tx *Tx, height uint32, blockTime int64) ([]byte, err
 			N:               vo.N,
 			ScriptPubKeyHex: hex,
 			ValueSat:        vo.ValueSat.Bytes(),
+			Type:            vo.ScriptPubKey.Type,
 		}
 	}
 	pt := &ProtoTransaction{
@@ -258,6 +259,7 @@ func (p *BaseParser) UnpackTx(buf []byte) (*Tx, uint32, error) {
 				Hex:       hex.EncodeToString(pto.ScriptPubKeyHex),
 			},
 			ValueSat: vs,
+			Type: pto.Type,
 		}
 	}
 	tx := Tx{

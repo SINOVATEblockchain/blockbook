@@ -160,6 +160,7 @@ type ProtoTransaction_VoutType struct {
 	N               uint32   `protobuf:"varint,2,opt,name=N" json:"N,omitempty"`
 	ScriptPubKeyHex []byte   `protobuf:"bytes,3,opt,name=ScriptPubKeyHex,proto3" json:"ScriptPubKeyHex,omitempty"`
 	Addresses       []string `protobuf:"bytes,4,rep,name=Addresses" json:"Addresses,omitempty"`
+	Type            string   `protobuf:"bytes,5,opt,name=Type" json:"Type,omitempty"`
 }
 
 func (m *ProtoTransaction_VoutType) Reset()                    { *m = ProtoTransaction_VoutType{} }

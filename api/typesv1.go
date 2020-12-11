@@ -32,7 +32,7 @@ type ScriptPubKeyV1 struct {
 	AddrDesc  bchain.AddressDescriptor `json:"-"`
 	Addresses []string                 `json:"addresses"`
 	IsAddress bool                     `json:"-"`
-	Type      string                   `json:"type,omitempty"`
+	Type      string                   `json:"type"`
 }
 
 // VoutV1 is used for legacy api v1
