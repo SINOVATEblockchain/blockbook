@@ -518,7 +518,7 @@ func (d *RocksDB) processAddressesBitcoinType(block *bchain.Block, addresses add
 			tao := &ta.Outputs[i]
 			tao.ValueSat = output.ValueSat
 			addrDesc, err := d.chainParser.GetAddrDescFromVout(&output)
-			if err != nil || len(addrDesc) == 0 || len(addrDesc) > maxAddrDescLen {
+			if err != nil || len(addrDesc) == 0 || len(addrDesc) > maxAddrDescLen || output.ValueSat.Cmp((big.NewInt(0))) == 0 {
 				if err != nil {
 					// do not log ErrAddressMissing, transactions can be without to address (for example eth contracts)
 					if err != bchain.ErrAddressMissing {
