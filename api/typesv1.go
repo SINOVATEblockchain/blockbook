@@ -91,6 +91,8 @@ type AddressUtxoV1 struct {
 	AmountSat     big.Int `json:"satoshis"`
 	Height        int     `json:"height,omitempty"`
 	Confirmations int     `json:"confirmations"`
+	Type          string  `json:"type"`
+	Hex           string  `json:"hex"`
 }
 
 // BlockV1 contains information about block
@@ -204,6 +206,8 @@ func (w *Worker) AddressUtxoToV1(au Utxos) []AddressUtxoV1 {
 			Height:        utxo.Height,
 			Txid:          utxo.Txid,
 			Vout:          uint32(utxo.Vout),
+			Type:          utxo.Type,
+			Hex:           utxo.Hex,
 		}
 	}
 	return v1

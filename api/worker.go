@@ -232,8 +232,8 @@ func (w *Worker) GetTransactionFromBchainTx(bchainTx *bchain.Tx, height int, spe
 		vout.ValueSat = (*Amount)(&bchainVout.ValueSat)
 		valOutSat.Add(&valOutSat, &bchainVout.ValueSat)
 		vout.Hex = bchainVout.ScriptPubKey.Hex
-                data, err := hex.DecodeString(bchainVout.ScriptPubKey.Hex)
-                vout.Type = txscript.GetScriptClass(data).String()
+		data, err := hex.DecodeString(bchainVout.ScriptPubKey.Hex)
+		vout.Type = txscript.GetScriptClass(data).String()
 		vout.AddrDesc, vout.Addresses, vout.IsAddress, err = w.getAddressesFromVout(bchainVout)
 		if err != nil {
 			glog.V(2).Infof("getAddressesFromVout error %v, %v, output %v", err, bchainTx.Txid, bchainVout.N)
@@ -828,6 +828,7 @@ func (w *Worker) getAddrDescUtxo(addrDesc bchain.AddressDescriptor, ba *db.AddrB
 		if err != nil {
 			return nil, err
 		}
+		glog.Info("Address has: ", len(txm), " coins")
 		if len(txm) > 0 {
 			mc := make([]*bchain.Tx, len(txm))
 			for i, txid := range txm {
@@ -850,6 +851,7 @@ func (w *Worker) getAddrDescUtxo(addrDesc bchain.AddressDescriptor, ba *db.AddrB
 					for i := range bchainTx.Vout {
 						vout := &bchainTx.Vout[i]
 						vad, err := w.chainParser.GetAddrDescFromVout(vout)
+						data, err := hex.DecodeString(vout.ScriptPubKey.Hex)
 						if err == nil && bytes.Equal(addrDesc, vad) {
 							// report only outpoints that are not spent in mempool
 							_, e := spentInMempool[bchainTx.Txid+strconv.Itoa(i)]
@@ -864,6 +866,8 @@ func (w *Worker) getAddrDescUtxo(addrDesc bchain.AddressDescriptor, ba *db.AddrB
 									AmountSat: (*Amount)(&vout.ValueSat),
 									Locktime:  bchainTx.LockTime,
 									Coinbase:  coinbase,
+									Type:      txscript.GetScriptClass(data).String(),
+									Hex:       vout.ScriptPubKey.Hex,
 								})
 							}
 						}
@@ -900,6 +904,8 @@ func (w *Worker) getAddrDescUtxo(addrDesc bchain.AddressDescriptor, ba *db.AddrB
 				if !e {
 					confirmations := bestheight - int(utxo.Height) + 1
 					coinbase := false
+					typetx := ""
+					hextx := ""
 					// for performance reasons, check coinbase transactions only in minimim confirmantion range
 					if confirmations < w.chainParser.MinimumCoinbaseConfirmations() {
 						ta, err := w.db.GetTxAddresses(txid)
@@ -909,6 +915,20 @@ func (w *Worker) getAddrDescUtxo(addrDesc bchain.AddressDescriptor, ba *db.AddrB
 						if len(ta.Inputs) == 1 && len(ta.Inputs[0].AddrDesc) == 0 && IsZeroBigInt(&ta.Inputs[0].ValueSat) {
 							coinbase = true
 						}
+						bchainTx, height, err := w.txCache.GetTransaction(txid)
+						if err != nil {
+							if err == bchain.ErrTxNotFound {
+								return nil, NewAPIError(fmt.Sprintf("Transaction '%v' not found", txid), true)
+							}
+							return nil, NewAPIError(fmt.Sprintf("Transaction '%v' not found (%v)", txid, err), true)
+						}
+						if height == 0 {
+							return nil, NewAPIError(fmt.Sprintf("Transaction '%v' not found (%v)", txid, err), true)
+						}
+						dbvout := &bchainTx.Vout[utxo.Vout]
+						data, err := hex.DecodeString(dbvout.ScriptPubKey.Hex)
+						typetx = txscript.GetScriptClass(data).String()
+						hextx = dbvout.ScriptPubKey.Hex
 					}
 					r = append(r, Utxo{
 						Txid:          txid,
@@ -917,6 +937,8 @@ func (w *Worker) getAddrDescUtxo(addrDesc bchain.AddressDescriptor, ba *db.AddrB
 						Height:        int(utxo.Height),
 						Confirmations: confirmations,
 						Coinbase:      coinbase,
+						Type:          typetx,
+						Hex:           hextx,
 					})
 				}
 				checksum.Sub(&checksum, &utxo.ValueSat)
