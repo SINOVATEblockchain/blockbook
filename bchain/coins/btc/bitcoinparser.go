@@ -80,6 +80,7 @@ func (p *BitcoinParser) GetAddrDescFromVout(output *bchain.Vout) (bchain.Address
 	// in Sinovate network: 2 more standard is: TimeLock and Burn_And_Data
 	// TimeLock is spendable, need to be indexed
 	if  sc == txscript.TimeLockTy { return txscript.ConvertTimeLocktoP2PKH(ad) }
+	if  sc == txscript.BurnAndDataTy { return txscript.ConvertBurnAndDatatoP2PKH(ad) }
 	// convert possible P2PK script to P2PKH
 	// so that all transactions by given public key are indexed together
 	return txscript.ConvertP2PKtoP2PKH(p.Params.Base58CksumHasher, ad)
