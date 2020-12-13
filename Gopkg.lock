@@ -14,14 +14,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8f67df323b34a8f3c736255cc090437c3ade53ae0d74ef1cf35832627048ad31"
+  digest = "1:1ea05a5e8aff07b9b810cba70753e4252748250e0f0ada694a61942a3bf0439e"
   name = "github.com/SINOVATEblockchain/btcutil"
-  packages = [
-    ".",
-    "txscript",
-  ]
+  packages = ["txscript"]
   pruneopts = ""
-  revision = "88418f366777d3c80cfc3473ea83d3a19a829b6f"
+  revision = "43c56a6ca1742731651be6fcaca1a7f6ddc00df0"
 
 [[projects]]
   branch = "master"
@@ -446,7 +443,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/SINOVATEblockchain/btcutil",
     "github.com/SINOVATEblockchain/btcutil/txscript",
     "github.com/bsm/go-vlq",
     "github.com/deckarep/golang-set",
